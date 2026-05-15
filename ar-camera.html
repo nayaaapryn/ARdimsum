@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>AR Camera | Dimsum-PJS Bintan</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family:'Outfit',sans-serif; background:#000; color:#fff; overflow:hidden; height:100vh; }
+        #video-container { position:fixed; inset:0; z-index:1; }
+        #camera-feed { width:100%; height:100%; object-fit:cover; }
+        #ar-overlay { position:fixed; inset:0; z-index:10; pointer-events:none; }
+        #ar-canvas { width:100%; height:100%; }
+        .ar-ui { position:fixed; z-index:20; }
+        .ar-header { top:0; left:0; right:0; padding:16px 20px; display:flex; justify-content:space-between; align-items:center; background:linear-gradient(180deg,rgba(0,0,0,0.6),transparent); }
+        .ar-back { pointer-events:auto; width:44px; height:44px; background:rgba(255,255,255,0.15); backdrop-filter:blur(10px); border:1px solid rgba(255,255,255,0.2); border-radius:50%; display:flex; align-items:center; justify-content:center; color:#fff; text-decoration:none; font-size:1.1rem; }
+        .ar-title { font-weight:700; font-size:1rem; text-shadow:0 2px 8px rgba(0,0,0,0.5); }
+        .ar-bottom { bottom:0; left:0; right:0; padding:20px; background:linear-gradient(0deg,rgba(0,0,0,0.8),transparent); }
+        .ar-menu-scroll { display:flex; gap:12px; overflow-x:auto; padding-bottom:16px; pointer-events:auto; -webkit-overflow-scrolling:touch; }
+        .ar-menu-scroll::-webkit-scrollbar { display:none; }
+        .ar-item { min-width:100px; background:rgba(255,255,255,0.1); backdrop-filter:blur(10px); border:2px solid rgba(255,255,255,0.15); border-radius:16px; padding:12px; text-align:center; cursor:pointer; transition:0.3s; flex-shrink:0; }
+        .ar-item:hover, .ar-item.active { border-color:#E63946; background:rgba(230,57,70,0.2); }
+        .ar-item-emoji { font-size:2rem; margin-bottom:4px; }
+        .ar-item-name { font-size:0.7rem; font-weight:600; white-space:nowrap; }
+        .ar-item-price { font-size:0.65rem; color:#F4A261; margin-top:2px; }
+        .ar-instructions { position:fixed; top:50%; left:50%; transform:translate(-50%,-50%); z-index:15; text-align:center; pointer-events:none; transition:opacity 0.5s; }
+        .ar-instructions.hidden { opacity:0; }
+        .ar-crosshair { width:80px; height:80px; border:2px solid rgba(255,255,255,0.4); border-radius:50%; margin:0 auto 16px; display:flex; align-items:center; justify-content:center; animation:pulse-ring 2s infinite; }
+        .ar-crosshair::before { content:''; width:8px; height:8px; background:#E63946; border-radius:50%; }
+        @keyframes pulse-ring { 0%,100% { transform:scale(1); opacity:1; } 50% { transform:scale(1.15); opacity:0.7; } }
+        .ar-inst-text { font-size:0.95rem; color:rgba(255,255,255,0.8); text-shadow:0 2px 8px rgba(0,0,0,0.8); }
+        .ar-place-btn { pointer-events:auto; position:fixed; bottom:120px; left:50%; transform:translateX(-50%); z-index:20; padding:14px 32px; background:linear-gradient(135deg,#E63946,#F4A261); border:none; border-radius:50px; color:#fff; font-family:'Outfit',sans-serif; font-weight:700; font-size:1rem; cursor:pointer; box-shadow:0 4px 20px rgba(230,57,70,0.4); transition:0.3s; display:flex; align-items:center; gap:8px; }
+        .ar-place-btn:hover { transform:translateX(-50%) scale(1.05); }
+        .ar-status { position:fixed; top:80px; left:50%; transform:translateX(-50%); z-index:20; background:rgba(0,0,0,0.7); backdrop-filter:blur(10px); padding:8px 20px; border-radius:50px; font-size:0.85rem; border:1px solid rgba(255,255,255,0.1); }
+        .no-camera { position:fixed; inset:0; z-index:100; background:#0D0D0D; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:24px; text-align:center; }
+        .no-camera i { font-size:4rem; color:#E63946; margin-bottom:20px; }
+        .no-camera h2 { margin-bottom:12px; }
+        .no-camera p { color:#A0A0B8; margin-bottom:24px; max-width:400px; }
+        .no-camera a { display:inline-flex; align-items:center; gap:8px; padding:14px 28px; background:linear-gradient(135deg,#E63946,#F4A261); border-radius:50px; color:#fff; font-weight:600; }
+    </style>
+</head>
+<body>
+    <div id="video-container">
+        <video id="camera-feed" autoplay playsinline></video>
+    </div>
+    <div id="ar-overlay">
+        <canvas id="ar-canvas"></canvas>
+    </div>
+
+    <div class="ar-ui ar-header">
+        <a href="index.html" class="ar-back"><i class="fas fa-arrow-left"></i></a>
+        <span class="ar-title">AR Camera - Dimsum PJS</span>
+        <div style="width:44px"></div>
+    </div>
+
+    <div class="ar-instructions" id="ar-instructions">
+        <div class="ar-crosshair"></div>
+        <p class="ar-inst-text">Arahkan kamera ke permukaan datar<br>lalu pilih dimsum dan tap "Tempatkan"</p>
+    </div>
+
+    <div id="ar-status" class="ar-status">📷 Kamera aktif</div>
+
+    <button id="place-btn" class="ar-place-btn">
+        <i class="fas fa-cube"></i> Tempatkan Dimsum
+    </button>
+
+    <div class="ar-ui ar-bottom">
+        <div class="ar-menu-scroll" id="ar-menu-scroll"></div>
+    </div>
+
+    <div id="no-camera" class="no-camera" style="display:none;">
+        <i class="fas fa-camera-slash"></i>
+        <h2>Kamera Tidak Tersedia</h2>
+        <p>Izinkan akses kamera pada browser Anda, atau pastikan perangkat memiliki kamera.</p>
+        <a href="index.html"><i class="fas fa-arrow-left"></i> Kembali</a>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/data.js"></script>
+    <script>
+    let selectedItem = menuItems[0];
+    let placedObjects = [];
+
+    // Render menu scroll
+    const scrollEl = document.getElementById('ar-menu-scroll');
+    scrollEl.innerHTML = menuItems.map((item, i) => `
+      <div class="ar-item ${i===0?'active':''}" data-id="${item.id}">
+        <div class="ar-item-emoji">${item.shape==='lumpia'||item.shape==='eggroll'||item.shape==='rambutan'||item.shape==='balls'||item.shape==='keju'||item.shape==='ayam_goreng'?'🍤':'🥟'}</div>
+        <div class="ar-item-name">${item.name}</div>
+        <div class="ar-item-price">${formatRp(item.price)}</div>
+      </div>
+    `).join('');
+
+    scrollEl.querySelectorAll('.ar-item').forEach(el => {
+      el.addEventListener('click', () => {
+        scrollEl.querySelectorAll('.ar-item').forEach(e => e.classList.remove('active'));
+        el.classList.add('active');
+        selectedItem = menuItems.find(m => m.id === parseInt(el.dataset.id));
+      });
+    });
+
+    // Camera
+    async function startCamera() {
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} } });
+        document.getElementById('camera-feed').srcObject = stream;
+        document.getElementById('ar-status').textContent = '📷 Kamera aktif - Pilih dimsum lalu "Tempatkan"';
+      } catch(e) {
+        document.getElementById('no-camera').style.display = 'flex';
+      }
+    }
+    startCamera();
+
+    // Three.js overlay
+    const canvas = document.getElementById('ar-canvas');
+    const scene = new THREE.Scene();
+    const camera3d = new THREE.PerspectiveCamera(45, window.innerWidth/window.innerHeight, 0.1, 100);
+    camera3d.position.set(0, 3, 6);
+    camera3d.lookAt(0, 0, 0);
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.shadowMap.enabled = true;
+
+    const ambient = new THREE.AmbientLight(0xffffff, 0.6);
+    scene.add(ambient);
+    const dirLight = new THREE.DirectionalLight(0xffffff, 0.8);
+    dirLight.position.set(3, 8, 5);
+    dirLight.castShadow = true;
+    scene.add(dirLight);
+
+    function createDimsum(item, x, z) {
+      const group = new THREE.Group();
+      
+      // Add a base depending on the category
+      if (item.category === 'steam' || item.category === 'special') {
+        // Bamboo Steamer base
+        const base = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.85,0.1,32), new THREE.MeshStandardMaterial({color:0x8B7355,roughness:0.8}));
+        base.position.y = 0.05;
+        group.add(base);
+        const wall = new THREE.Mesh(new THREE.CylinderGeometry(0.8,0.8,0.3,32,1,true), new THREE.MeshStandardMaterial({color:0xA0895C,roughness:0.7,side:THREE.DoubleSide}));
+        wall.position.y = 0.2;
+        group.add(wall);
+        // Banana leaf inside
+        const leaf = new THREE.Mesh(new THREE.CylinderGeometry(0.78,0.78,0.01,32), new THREE.MeshStandardMaterial({color:0x4B6B3A,roughness:0.9}));
+        leaf.position.y = 0.08;
+        group.add(leaf);
+      } else {
+        // Black Plate for fried items
+        const plateGeo = new THREE.CylinderGeometry(0.8, 0.6, 0.08, 32);
+        const plateMat = new THREE.MeshStandardMaterial({ color: 0x111111, roughness: 0.2, metalness: 0.1 });
+        const plate = new THREE.Mesh(plateGeo, plateMat);
+        plate.position.y = 0.04;
+        group.add(plate);
+      }
+
+      // Add the actual dimsum model
+      const dimsumGroup = createDimsumGroup(item, THREE);
+      group.add(dimsumGroup);
+      
+      // Label
+      const lc = document.createElement('canvas');
+      lc.width=256; lc.height=40;
+      const ctx = lc.getContext('2d');
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 20px Outfit,sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText(item.name, 128, 28);
+      const labelMesh = new THREE.Mesh(new THREE.PlaneGeometry(1.5,0.2), new THREE.MeshBasicMaterial({map:new THREE.CanvasTexture(lc),transparent:true}));
+      labelMesh.position.set(0, 0.8, 0);
+      labelMesh.lookAt(camera3d.position);
+      group.add(labelMesh);
+
+      group.position.set(x, -0.5, z);
+      group.scale.set(0, 0, 0);
+      scene.add(group);
+      
+      // Animate in
+      let scale = 0;
+      const grow = setInterval(() => {
+        scale += 0.05;
+        if (scale >= 1) { scale = 1; clearInterval(grow); }
+        group.scale.set(scale, scale, scale);
+      }, 16);
+      return group;
+    }
+
+    // Place button
+    document.getElementById('place-btn').addEventListener('click', () => {
+      const x = (Math.random() - 0.5) * 3;
+      const z = (Math.random() - 0.5) * 2 - 1;
+      const obj = createDimsum(selectedItem, x, z);
+      placedObjects.push(obj);
+      document.getElementById('ar-instructions').classList.add('hidden');
+      document.getElementById('ar-status').textContent = `✅ ${selectedItem.name} ditempatkan! (${placedObjects.length} item)`;
+    });
+
+    // Touch/Mouse rotation
+    let isDragging = false;
+    let prevPos = { x: 0, y: 0 };
+    const canvasEl = document.getElementById('ar-canvas');
+    canvasEl.style.pointerEvents = 'auto';
+
+    function onDown(e) {
+      isDragging = true;
+      prevPos.x = e.touches ? e.touches[0].clientX : e.clientX;
+      prevPos.y = e.touches ? e.touches[0].clientY : e.clientY;
+    }
+    function onMove(e) {
+      if (!isDragging) return;
+      const x = e.touches ? e.touches[0].clientX : e.clientX;
+      const y = e.touches ? e.touches[0].clientY : e.clientY;
+      const deltaX = x - prevPos.x;
+      const deltaY = y - prevPos.y;
+      
+      placedObjects.forEach(obj => {
+        obj.rotation.y += deltaX * 0.01;
+        obj.rotation.x += deltaY * 0.01;
+      });
+      prevPos = { x, y };
+    }
+    function onUp() { isDragging = false; }
+
+    canvasEl.addEventListener('mousedown', onDown);
+    canvasEl.addEventListener('mousemove', onMove);
+    canvasEl.addEventListener('mouseup', onUp);
+    canvasEl.addEventListener('touchstart', onDown, {passive: true});
+    canvasEl.addEventListener('touchmove', onMove, {passive: true});
+    canvasEl.addEventListener('touchend', onUp);
+
+    // Animate
+    function animate() {
+      requestAnimationFrame(animate);
+      // Auto rotate slowly if not dragging
+      if (!isDragging) {
+        placedObjects.forEach(obj => { obj.rotation.y += 0.005; });
+      }
+      renderer.render(scene, camera3d);
+    }
+    animate();
+
+    window.addEventListener('resize', () => {
+      camera3d.aspect = window.innerWidth/window.innerHeight;
+      camera3d.updateProjectionMatrix();
+      renderer.setSize(window.innerWidth, window.innerHeight);
+    });
+    </script>
+</body>
+</html>

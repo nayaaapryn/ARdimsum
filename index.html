@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>Dimsum-PJS Bintan | AR 3D Experience & Pesan Online</title>
+  <meta name="description" content="Jelajahi menu Dimsum-PJS Bintan dalam pengalaman Augmented Reality 3D. Pesan dimsum favorit Anda langsung via WhatsApp!">
+  <meta name="keywords" content="Dimsum PJS, Bintan, AR, Augmented Reality, 3D, UMKM, Dimsum">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Splash Screen -->
+  <div id="splash-screen" class="splash-screen">
+    <div class="splash-content">
+      <div class="splash-logo">
+        <div class="splash-icon"><i class="fas fa-cube"></i></div>
+        <h1 class="splash-title">DIMSUM-PJS</h1>
+        <p class="splash-subtitle">Bintan</p>
+      </div>
+      <div class="splash-loader"><div class="loader-bar"></div></div>
+      <p class="splash-text">Memuat Pengalaman AR 3D...</p>
+    </div>
+  </div>
+
+  <!-- Toast Notif -->
+  <div id="cart-toast" class="cart-toast"></div>
+
+  <!-- Cart Overlay -->
+  <div id="cart-overlay" class="cart-overlay" onclick="closeCart()"></div>
+
+  <!-- Cart Sidebar -->
+  <div id="cart-sidebar" class="cart-sidebar">
+    <div class="cart-header">
+      <h3><i class="fas fa-shopping-basket"></i> Keranjang</h3>
+      <button onclick="closeCart()" class="cart-close"><i class="fas fa-times"></i></button>
+    </div>
+    <div id="cart-empty" class="cart-empty" style="display:flex;">
+      <i class="fas fa-shopping-basket"></i>
+      <p>Keranjang masih kosong</p>
+      <span>Yuk tambah dimsum favorit kamu!</span>
+    </div>
+    <div id="cart-items" class="cart-items"></div>
+    <div id="cart-footer" class="cart-footer" style="display:none;">
+      <div class="cart-total-row">
+        <span>Total Pesanan</span>
+        <span id="cart-total" class="cart-total-amount">Rp 0</span>
+      </div>
+      <button class="btn btn-primary btn-checkout" onclick="openOrderModal()">
+        <i class="fas fa-paper-plane"></i> Lanjut Pesan
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav id="navbar" class="navbar">
+    <div class="nav-container">
+      <div class="nav-logo">
+        <div class="logo-icon"><i class="fas fa-cube"></i></div>
+        <span class="logo-text">DIMSUM-PJS</span>
+      </div>
+      <div class="nav-links">
+        <a href="#home" class="nav-link active">Beranda</a>
+        <a href="#menu" class="nav-link">Menu</a>
+        <a href="#ar-section" class="nav-link">AR 3D</a>
+        <a href="#contact" class="nav-link">Kontak</a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;">
+        <button class="cart-nav-btn" onclick="openCart()" aria-label="Buka Keranjang">
+          <i class="fas fa-shopping-basket"></i>
+          <span class="cart-badge" style="display:none;">0</span>
+        </button>
+        <button id="nav-toggle" class="nav-toggle" aria-label="Toggle navigation">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Mobile Menu -->
+  <div id="mobile-menu" class="mobile-menu">
+    <a href="#home" class="mobile-link">Beranda</a>
+    <a href="#menu" class="mobile-link">Menu</a>
+    <a href="#ar-section" class="mobile-link">AR 3D</a>
+    <a href="#contact" class="mobile-link">Kontak</a>
+  </div>
+
+  <!-- Hero Section -->
+  <section id="home" class="hero">
+    <div class="hero-bg">
+      <div class="hero-gradient"></div>
+      <div class="floating-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+        <div class="shape shape-4"></div>
+        <div class="shape shape-5"></div>
+      </div>
+    </div>
+    <div class="hero-content">
+      <div class="hero-badge"><i class="fas fa-star"></i><span>UMKM Bintan Terbaik</span></div>
+      <h1 class="hero-title">
+        <span class="title-line">Jelajahi</span>
+        <span class="title-line gradient-text">Dimsum-PJS</span>
+        <span class="title-line">dalam <em>3D</em></span>
+      </h1>
+      <p class="hero-desc">Rasakan pengalaman unik melihat menu dimsum kami dalam tampilan <strong>Augmented Reality 3D</strong>. Scan, lihat, dan pesan dimsum favorit Anda!</p>
+      <div class="hero-buttons">
+        <a href="#menu" class="btn btn-primary" id="btn-start-ar">
+          <i class="fas fa-utensils"></i><span>Pesan Sekarang</span>
+        </a>
+        <a href="#ar-section" class="btn btn-secondary">
+          <i class="fas fa-vr-cardboard"></i><span>Lihat AR 3D</span>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="stat">
+          <span class="stat-number" data-count="22">0</span>
+          <span class="stat-label">Varian Menu</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-number" data-count="3">0</span>
+          <span class="stat-label">Cabang</span>
+        </div>
+        <div class="stat-divider"></div>
+        <div class="stat">
+          <span class="stat-number" data-count="500">0</span>
+          <span class="stat-label">Pelanggan+</span>
+        </div>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="hero-3d-container">
+        <div class="rotating-card card-1"><img src="assets/images/dimsum_ayam.jpeg" alt="Dimsum Ayam"></div>
+        <div class="rotating-card card-2"><img src="assets/images/dimsum_udang.jpeg" alt="Dimsum Udang"></div>
+        <div class="rotating-card card-3"><img src="assets/images/dimsum_nori.jpeg" alt="Dimsum Nori"></div>
+      </div>
+    </div>
+    <div class="scroll-indicator">
+      <div class="mouse"><div class="wheel"></div></div>
+      <span>Scroll untuk menjelajahi</span>
+    </div>
+  </section>
+
+  <!-- Menu Section -->
+  <section id="menu" class="menu-section">
+    <div class="section-header">
+      <span class="section-tag"><i class="fas fa-fire"></i> Menu Lengkap</span>
+      <h2 class="section-title">Menu <span class="gradient-text">Dimsum-PJS</span></h2>
+      <p class="section-desc">Pilih dimsum favorit Anda dan masukkan ke keranjang, lalu pesan!</p>
+    </div>
+    <!-- Category Filter -->
+    <div class="menu-filter">
+      <button class="filter-btn active" data-filter="all">Semua</button>
+      <button class="filter-btn" data-filter="ayam">🐔 Ayam</button>
+      <button class="filter-btn" data-filter="nori">🍙 Nori</button>
+      <button class="filter-btn" data-filter="kepiting">🦀 Kepiting</button>
+      <button class="filter-btn" data-filter="udang">🍤 Udang</button>
+      <button class="filter-btn" data-filter="paket">📦 Paket</button>
+      <button class="filter-btn" data-filter="lainnya">✨ Lainnya</button>
+    </div>
+    <!-- Cart Sticky Banner -->
+    <div id="cart-banner" class="cart-banner" style="display:none;">
+      <div class="cart-banner-info">
+        <i class="fas fa-shopping-basket"></i>
+        <span id="cart-banner-text">0 item</span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openCart()">
+        <i class="fas fa-eye"></i> Lihat Keranjang
+      </button>
+    </div>
+    <!-- Menu Grid -->
+    <div class="menu-grid" id="menu-grid"></div>
+  </section>
+
+  <!-- AR Section -->
+  <section id="ar-section" class="ar-section">
+    <div class="ar-bg"><div class="ar-gradient"></div></div>
+    <div class="ar-content">
+      <div class="section-header light">
+        <span class="section-tag"><i class="fas fa-cube"></i> Teknologi AR</span>
+        <h2 class="section-title">Pengalaman <span class="gradient-text">AR 3D</span></h2>
+        <p class="section-desc">Lihat dimsum dalam tampilan 3D di meja Anda menggunakan kamera</p>
+      </div>
+      <div class="ar-modes">
+        <div class="ar-mode-card" id="mode-viewer">
+          <div class="mode-icon"><i class="fas fa-cube"></i></div>
+          <h3>3D Viewer</h3>
+          <p>Lihat dimsum dalam tampilan 3D interaktif. Putar, zoom, dan jelajahi setiap detail.</p>
+          <button class="btn btn-primary btn-mode" data-mode="viewer">
+            <i class="fas fa-eye"></i> Buka 3D Viewer
+          </button>
+        </div>
+        <div class="ar-mode-card featured" id="mode-ar">
+          <div class="mode-badge">POPULER</div>
+          <div class="mode-icon"><i class="fas fa-vr-cardboard"></i></div>
+          <h3>AR Camera</h3>
+          <p>Arahkan kamera ke meja Anda dan lihat dimsum muncul secara langsung di dunia nyata!</p>
+          <button class="btn btn-primary btn-mode" data-mode="ar">
+            <i class="fas fa-camera"></i> Buka AR Camera
+          </button>
+        </div>
+        <div class="ar-mode-card" id="mode-marker">
+          <div class="mode-icon"><i class="fas fa-qrcode"></i></div>
+          <h3>Marker AR</h3>
+          <p>Scan marker khusus untuk melihat dimsum 3D muncul di atas marker.</p>
+          <button class="btn btn-primary btn-mode" data-mode="marker">
+            <i class="fas fa-expand"></i> Scan Marker
+          </button>
+        </div>
+      </div>
+      <div class="how-to-use">
+        <h3><i class="fas fa-info-circle"></i> Cara Menggunakan AR</h3>
+        <div class="steps">
+          <div class="step"><div class="step-number">1</div><div class="step-content"><h4>Pilih Mode</h4><p>Pilih mode AR yang ingin digunakan</p></div></div>
+          <div class="step"><div class="step-number">2</div><div class="step-content"><h4>Izinkan Kamera</h4><p>Berikan izin akses kamera pada browser</p></div></div>
+          <div class="step"><div class="step-number">3</div><div class="step-content"><h4>Arahkan Kamera</h4><p>Arahkan kamera ke permukaan datar</p></div></div>
+          <div class="step"><div class="step-number">4</div><div class="step-content"><h4>Nikmati 3D!</h4><p>Lihat dimsum 3D muncul dan interaksi</p></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3D Viewer Modal -->
+  <div id="viewer-modal" class="viewer-modal">
+    <div class="viewer-container">
+      <button id="close-viewer" class="close-viewer"><i class="fas fa-times"></i></button>
+      <div class="viewer-header">
+        <h3 id="viewer-title">Dimsum Ayam</h3>
+        <p id="viewer-desc">Putar dan zoom untuk melihat detail</p>
+      </div>
+      <div class="viewer-canvas-container">
+        <canvas id="viewer-canvas"></canvas>
+        <div class="viewer-controls">
+          <button class="viewer-ctrl" id="ctrl-rotate" title="Putar Otomatis"><i class="fas fa-sync-alt"></i></button>
+          <button class="viewer-ctrl" id="ctrl-zoom-in" title="Zoom In"><i class="fas fa-search-plus"></i></button>
+          <button class="viewer-ctrl" id="ctrl-zoom-out" title="Zoom Out"><i class="fas fa-search-minus"></i></button>
+          <button class="viewer-ctrl" id="ctrl-reset" title="Reset"><i class="fas fa-undo"></i></button>
+        </div>
+      </div>
+      <div class="viewer-info">
+        <div class="viewer-price" id="viewer-price">Rp 20.000</div>
+        <div class="viewer-details" id="viewer-details">
+          <span class="detail-tag"><i class="fas fa-fire"></i> Best Seller</span>
+          <span class="detail-tag"><i class="fas fa-clock"></i> 5 menit</span>
+        </div>
+        <button class="btn btn-primary btn-order" id="btn-order">
+          <i class="fas fa-cart-plus"></i> Tambah ke Keranjang
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXTRAS MODAL -->
+  <div id="extras-modal" class="order-modal">
+    <div class="order-modal-container">
+      <div class="order-modal-header">
+        <h3><i class="fas fa-plus-circle"></i> Pilih Ekstra</h3>
+        <button onclick="closeExtrasModal()" class="cart-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="order-modal-body">
+        <div style="text-align:center; margin-bottom: 20px;">
+          <h4 id="extra-item-name" style="color:#E63946; font-size:1.2rem;">Nama Item</h4>
+          <p id="extra-item-price" style="color:#A0A0B8; font-size:0.9rem;">Rp 0</p>
+        </div>
+        
+        <div class="order-section" id="extra-mentai-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <div>
+              <strong style="display:block; font-size:1rem;">Extra Mentai</strong>
+              <small style="color:#A0A0B8;">+ Rp 4.000 / porsi <br><i style="font-size:0.8em;color:#F4A261;">(1 Ekstra = 1 Porsi / ±3-4 pcs)</i></small>
+            </div>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <button onclick="changeExtraQty('mentai', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:rgba(255,255,255,0.1); color:#fff; cursor:pointer;"><i class="fas fa-minus"></i></button>
+              <span id="extra-mentai-qty" style="font-weight:bold;">0</span>
+              <button onclick="changeExtraQty('mentai', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:linear-gradient(135deg,#E63946,#F4A261); color:#fff; cursor:pointer;"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <div>
+              <strong style="display:block; font-size:1rem;">Extra Mozzarella</strong>
+              <small style="color:#A0A0B8;">+ Rp 6.000 / porsi <br><i style="font-size:0.8em;color:#F4A261;">(1 Ekstra = 1 Porsi / ±3-4 pcs)</i></small>
+            </div>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <button onclick="changeExtraQty('mozza', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:rgba(255,255,255,0.1); color:#fff; cursor:pointer;"><i class="fas fa-minus"></i></button>
+              <span id="extra-mozza-qty" style="font-weight:bold;">0</span>
+              <button onclick="changeExtraQty('mozza', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:linear-gradient(135deg,#E63946,#F4A261); color:#fff; cursor:pointer;"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-section">
+          <div style="display:flex; justify-content:space-between; align-items:center; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 8px; border: 1px solid rgba(255,255,255,0.1);">
+            <div>
+              <strong style="display:block; font-size:1rem;">Extra Saos</strong>
+              <small style="color:#A0A0B8;">+ Rp 5.000 / bungkus</small>
+            </div>
+            <div style="display:flex; align-items:center; gap: 10px;">
+              <button onclick="changeExtraQty('saos', -1)" style="width:30px; height:30px; border-radius:50%; border:none; background:rgba(255,255,255,0.1); color:#fff; cursor:pointer;"><i class="fas fa-minus"></i></button>
+              <span id="extra-saos-qty" style="font-weight:bold;">0</span>
+              <button onclick="changeExtraQty('saos', 1)" style="width:30px; height:30px; border-radius:50%; border:none; background:linear-gradient(135deg,#E63946,#F4A261); color:#fff; cursor:pointer;"><i class="fas fa-plus"></i></button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <div class="order-modal-footer">
+        <button class="btn btn-primary btn-checkout" onclick="confirmExtrasAndAdd()" style="display:flex; justify-content:space-between; width:100%;">
+          <span>Masukkan Keranjang</span>
+          <span id="extra-total-price">Rp 0</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER MODAL -->
+  <div id="order-modal" class="order-modal">
+    <div class="order-modal-container">
+      <div class="order-modal-header">
+        <h3><i class="fas fa-paper-plane"></i> Konfirmasi Pesanan</h3>
+        <button onclick="closeOrderModal()" class="cart-close"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="order-modal-body">
+        <!-- Summary -->
+        <div class="order-section">
+          <h4 class="order-section-title"><i class="fas fa-list"></i> Ringkasan Pesanan</h4>
+          <div id="order-summary-list" class="order-summary-list"></div>
+        </div>
+
+        <!-- Pilih Outlet -->
+        <div class="order-section">
+          <h4 class="order-section-title"><i class="fas fa-map-marker-alt"></i> Pilih Outlet</h4>
+          <div class="outlet-grid">
+            <button class="outlet-btn" data-outlet="km16" onclick="selectOutlet('km16')">
+              <i class="fas fa-store"></i>
+              <span>Cabang KM 16</span>
+            </button>
+            <button class="outlet-btn" data-outlet="uban" onclick="selectOutlet('uban')">
+              <i class="fas fa-store"></i>
+              <span>Cabang Uban</span>
+            </button>
+            <button class="outlet-btn" data-outlet="kijang" onclick="selectOutlet('kijang')">
+              <i class="fas fa-store"></i>
+              <span>Cabang Kijang</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Pilih Pembayaran -->
+        <div class="order-section" id="payment-section" style="display:none;">
+          <h4 class="order-section-title"><i class="fas fa-credit-card"></i> Metode Pembayaran</h4>
+          <div class="payment-grid">
+            <button class="payment-btn" data-payment="tempat" onclick="selectPayment('tempat')">
+              <i class="fas fa-money-bill-wave"></i>
+              <span>Bayar di Tempat</span>
+              <small>Cash / tunai saat menerima</small>
+            </button>
+            <button class="payment-btn" data-payment="transfer" onclick="selectPayment('transfer')">
+              <i class="fas fa-mobile-alt"></i>
+              <span>Transfer</span>
+              <small>Transfer Bank / E-wallet</small>
+            </button>
+          </div>
+        </div>
+
+        <!-- Upload Bukti Transfer -->
+        <div class="order-section" id="transfer-section" style="display:none;">
+          <h4 class="order-section-title"><i class="fas fa-image"></i> Bukti Transfer</h4>
+          <div class="transfer-info">
+            <div class="transfer-account">
+              <div class="transfer-acc-row"><span>Bank BRI</span><strong>1234-5678-9012-3456</strong></div>
+              <div class="transfer-acc-row"><span>A/N</span><strong>Dimsum PJS Bintan</strong></div>
+              <div class="transfer-acc-row"><span>Total</span><strong id="transfer-total-amount" class="gradient-text">Rp 0</strong></div>
+            </div>
+          </div>
+          <div class="upload-area" id="upload-area" onclick="document.getElementById('proof-input').click()">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p>Klik atau tap untuk upload bukti transfer</p>
+            <small>Format: JPG, PNG, max 5MB</small>
+          </div>
+          <input type="file" id="proof-input" accept="image/*" style="display:none;" onchange="handleProofUpload(event)">
+          <div id="proof-preview" class="proof-preview" style="display:none;">
+            <img id="proof-img" src="" alt="Bukti Transfer">
+            <button onclick="removeProof()" class="remove-proof"><i class="fas fa-trash"></i> Hapus</button>
+          </div>
+        </div>
+      </div>
+      <div class="order-modal-footer">
+        <button id="btn-send-order" class="btn btn-whatsapp btn-checkout" onclick="sendOrder()" style="display:none;">
+          <i class="fab fa-whatsapp"></i> Kirim Pesanan via WhatsApp
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contact Section -->
+  <section id="contact" class="contact-section">
+    <div class="section-header">
+      <span class="section-tag"><i class="fas fa-phone"></i> Hubungi Kami</span>
+      <h2 class="section-title">Pesan <span class="gradient-text">Sekarang</span></h2>
+      <p class="section-desc">Hubungi kami untuk pemesanan dimsum terbaik di Bintan</p>
+    </div>
+    <div class="contact-cards">
+      <a href="https://wa.me/6282389005669" class="contact-card whatsapp" target="_blank" id="contact-whatsapp">
+        <div class="contact-icon"><i class="fab fa-whatsapp"></i></div>
+        <h3>WhatsApp</h3>
+        <p>082389005669</p>
+      </a>
+      <a href="https://instagram.com/dimsumpjsbintan" class="contact-card instagram" target="_blank" id="contact-instagram">
+        <div class="contact-icon"><i class="fab fa-instagram"></i></div>
+        <h3>Instagram</h3>
+        <p>@dimsumpjsbintan</p>
+      </a>
+      <div class="contact-card qr-card" id="contact-qr">
+        <div class="contact-icon" style="background:rgba(230,57,70,0.2);color:#E63946;">
+          <i class="fas fa-qrcode"></i>
+        </div>
+        <h3>Buka di HP</h3>
+        <div style="margin-top:12px;background:white;padding:8px;border-radius:8px;display:inline-block;">
+          <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://nayaaapryn.github.io/ARdimsum/" alt="QR Code" style="width:120px;height:120px;display:block;border-radius:4px;">
+        </div>
+        <p style="font-size:0.8rem;margin-top:10px;">Scan QR ini</p>
+      </div>
+    </div>
+    
+    <div class="section-header" style="margin-top: 60px;">
+      <span class="section-tag"><i class="fas fa-map-marked-alt"></i> 3 Cabang Kami</span>
+      <h2 class="section-title">Kunjungi <span class="gradient-text">Outlet</span></h2>
+    </div>
+    <div class="contact-cards">
+      <a href="https://www.google.com/maps/search/?api=1&query=Dimsum+PJS+KM+16+Bintan" class="contact-card location" target="_blank">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Cabang KM 16</h3>
+        <p>Lihat di Peta</p>
+      </a>
+      <a href="https://www.google.com/maps/search/?api=1&query=Dimsum+PJS+Tanjung+Uban" class="contact-card location" target="_blank">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Cabang Uban</h3>
+        <p>Lihat di Peta</p>
+      </a>
+      <a href="https://www.google.com/maps/search/?api=1&query=Dimsum+PJS+Kijang+Bintan" class="contact-card location" target="_blank">
+        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+        <h3>Cabang Kijang</h3>
+        <p>Lihat di Peta</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-logo">
+        <div class="logo-icon"><i class="fas fa-cube"></i></div>
+        <span>DIMSUM-PJS Bintan</span>
+      </div>
+      <p class="footer-text">© 2026 Dimsum-PJS Bintan. AR 3D Experience oleh AR'TEKNO.</p>
+      <div class="footer-social">
+        <a href="https://wa.me/6282389005669" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+        <a href="https://instagram.com/dimsumpjsbintan" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      </div>
+    </div>
+  </footer>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
