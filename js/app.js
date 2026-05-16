@@ -64,6 +64,12 @@ let extraMentaiQty = 0;
 let extraMozzaQty = 0;
 let extraSaosQty = 0;
 
+const OUTLETS = [
+  { id: 'km16', name: 'Toapaya KM 16', wa: '6282389005669' },
+  { id: 'uban', name: 'Tanjung Uban', wa: '6282389005669' },
+  { id: 'kijang', name: 'Kijang', wa: '6282389005669' }
+];
+
 function addToCart(id){
   currentExtraItemId = id;
   const item = menuItems.find(i => i.id === id);
@@ -72,10 +78,12 @@ function addToCart(id){
   document.getElementById('extra-item-name').textContent = item.name;
   document.getElementById('extra-item-price').textContent = formatRp(item.price);
   
-  if (item.shape === 'udang') {
-    document.getElementById('extra-mentai-section').style.display = 'none';
-  } else {
+  if (item.category === 'paket') {
     document.getElementById('extra-mentai-section').style.display = 'block';
+    document.getElementById('extra-mozza-section').style.display = 'block';
+  } else {
+    document.getElementById('extra-mentai-section').style.display = 'none';
+    document.getElementById('extra-mozza-section').style.display = 'none';
   }
 
   extraMentaiQty = 0;
@@ -95,11 +103,31 @@ function closeExtrasModal() {
 }
 
 function changeExtraQty(type, delta) {
+  const item = menuItems.find(i => i.id === currentExtraItemId);
+  if (!item) return;
+
   if (type === 'mentai') {
+    let maxMentai = 3;
+    // Paket 2 & 3 mengandung dimsum udang yang tidak bisa dipakaikan mentai
+    if (item.shape === 'paket2' || item.shape === 'paket3') maxMentai = 2;
+    
+    if (delta > 0 && extraMentaiQty >= maxMentai) {
+      if (maxMentai === 2) {
+        alert('Maaf, dimsum udang tidak bisa menggunakan mentai. Maksimal ekstra mentai untuk paket ini adalah ' + maxMentai + ' porsi.');
+      } else {
+        alert('Maksimal ekstra mentai adalah ' + maxMentai + ' porsi.');
+      }
+      return;
+    }
     extraMentaiQty += delta;
     if (extraMentaiQty < 0) extraMentaiQty = 0;
     document.getElementById('extra-mentai-qty').textContent = extraMentaiQty;
   } else if (type === 'mozza') {
+    let maxMozza = 3;
+    if (delta > 0 && extraMozzaQty >= maxMozza) {
+      alert('Maksimal ekstra mozzarella adalah ' + maxMozza + ' porsi.');
+      return;
+    }
     extraMozzaQty += delta;
     if (extraMozzaQty < 0) extraMozzaQty = 0;
     document.getElementById('extra-mozza-qty').textContent = extraMozzaQty;
@@ -156,7 +184,6 @@ function confirmExtrasAndAdd() {
   closeExtrasModal();
   updateCartUI();
   showCartToast(displayName);
-  openCart();
 }
 
 function removeFromCart(cartItemId){
